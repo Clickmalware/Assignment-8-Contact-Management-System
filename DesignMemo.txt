@@ -1,0 +1,8 @@
+Why is a hash table the right structure for fast lookups?
+It has direct access using the hash function which cause it to have use of the 
+memory by using arrays.
+How did you handle collisions?
+Using chaining in a list to prevent when two into one spot. It help determine to adjust and prevents collisions.
+When might an engineer choose a hash table over a list or tree?
+When things like order doesnt matter and you something to look up fast using direct
+lookup by key.

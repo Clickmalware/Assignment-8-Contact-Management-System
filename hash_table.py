@@ -24,10 +24,11 @@ class Node:
 
 class HashTable:
     '''
-    HashTable class to represent a hash table for storing contacts.
+    HashTable class to represent a hash table for storing contacts using chaining.
+    Each bucket is a Python list of (key, Contact) tuples to handle collisions.
     Attributes:
         size (int): The size of the hash table.
-        data (list): The underlying array to store linked lists for collision handling.
+        data (list): The underlying array where each element is a list (chain).
     Methods:
         hash_function(key): Converts a string key into an array index.
         insert(key, value): Inserts a new contact into the hash table.
@@ -36,7 +37,8 @@ class HashTable:
     '''
     def __init__(self, size=10):
         self.size = size
-        self.data = [None] * size
+        # Use lists for chains (simple and efficient in Python)
+        self.data = [[] for _ in range(size)]
 
     def hash_function(self, key):
         """Simple hash: sum of ordinals mod table size."""
@@ -65,48 +67,37 @@ class HashTable:
                 contact.number = value
 
         idx = self.hash_function(key)
-        node = self.data[idx]
+        bucket = self.data[idx]
 
-        if node is None:
-            self.data[idx] = Node(key, contact)
-            return
-
-        # Traverse chain to update if key exists, otherwise append
-        prev = None
-        curr = node
-        while curr:
-            if curr.key == key:
-                curr.value = contact
+        # Update existing entry if key found
+        for i, (k, _) in enumerate(bucket):
+            if k == key:
+                bucket[i] = (key, contact)
                 return
-            prev = curr
-            curr = curr.next
 
-        prev.next = Node(key, contact)
+        # Otherwise append new entry to the chain
+        bucket.append((key, contact))
 
     def search(self, key):
         """Return the Contact with matching name, or None if not found."""
         idx = self.hash_function(key)
-        curr = self.data[idx]
-        while curr:
-            if curr.key == key:
-                return curr.value
-            curr = curr.next
+        bucket = self.data[idx]
+        for k, contact in bucket:
+            if k == key:
+                return contact
         return None
 
     def print_table(self):
         """Print the structure of the hash table."""
-        for i, node in enumerate(self.data):
+        for i, bucket in enumerate(self.data):
             entries = []
-            curr = node
-            while curr:
+            for k, contact in bucket:
                 # Safely access name/number attributes if present
-                name = getattr(curr.value, "name", None) or curr.key
-                number = getattr(curr.value, "number", None)
+                name = getattr(contact, "name", None) or k
+                number = getattr(contact, "number", None)
                 if number is not None:
                     entries.append(f"{name}:{number}")
                 else:
                     entries.append(str(name))
-                curr = curr.next
             chain = " -> ".join(entries) if entries else "None"
             print(f"[{i}]: {chain}")
-\
